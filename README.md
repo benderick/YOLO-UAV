@@ -11,5 +11,18 @@
 
 ## 事项列表
 1. 基于YOLO11s，在VisDrone上寻找最优超参数
-    - epoches=70, iterations=40
-    - 
+    - epoches=50, iterations=50
+    - 使用190跑
+    - 参数：
+    ```python
+    model.tune(data='../cfg/VisDrone.yaml', 
+           epochs=50,
+           iterations=50,
+           device="6,7",
+           batch=64, 
+           project="../../tmp/yolo-runs/YOLO11s-VisDrone-Tune",name="tune",
+           patience=10)
+    ```
+    - 在cfg文件夹下的VisDrone-Tune.yaml用来覆盖default.yaml
+2. YOLO11s，在VisDrone跑300轮
+
