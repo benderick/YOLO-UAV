@@ -1,0 +1,18 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /mode: default
+  - override /data: VisDrone
+  - override /model: yolo12s
+
+
+project_name: VisDrone-Train
+run_name: ${model.name}
+
+epochs: 1
+device: "0"
+batch: 4
+

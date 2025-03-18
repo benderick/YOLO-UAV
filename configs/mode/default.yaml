@@ -1,0 +1,2 @@
+use_cfg_file: True
+cfg_file: ${paths.root_dir}/configs/setting/setting.yaml

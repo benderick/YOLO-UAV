@@ -1,2 +1,5 @@
 VisDrone/
-tmp
+logs/
+data/
+tmp/
+.env
