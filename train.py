@@ -14,9 +14,10 @@ from ultralytics import YOLO
 @hydra.main(version_base="1.3", config_path="configs", config_name="config")
 def main(cfg: DictConfig) -> None:
     ultralytics.settings["datasets_dir"] = cfg.paths.data_dir
+    ultralytics.settings["wandb"] = cfg.use_wandb
     model = YOLO(cfg.model.cfg_file)
     model.train(
-        project=f"{cfg.paths.log_dir}/{cfg.project_name}",
+        project=f"{cfg.paths.output_dir}/{cfg.project_name}",
         name=cfg.run_name,
         data=cfg.data.cfg_file, 
         cfg=cfg.mode.cfg_file,

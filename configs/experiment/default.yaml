@@ -11,8 +11,11 @@ defaults:
 
 project_name: VisDrone-Train
 run_name: ${model.name}
+use_wandb: True
 
 epochs: 1
 device: "0"
 batch: 4
 
+
+msg: ???
