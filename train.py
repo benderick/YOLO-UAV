@@ -24,7 +24,8 @@ def main(cfg: DictConfig) -> None:
         epochs=cfg.epochs,
         device=cfg.device,
         batch=cfg.batch,
-        fraction=0.01
+        fraction=0.01,
+        notes = cfg.notes
         )
 
 if __name__ == "__main__":
