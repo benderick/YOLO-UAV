@@ -1,6 +1,8 @@
-VisDrone/
-logs/
-data/
+logs/*
+/data/*
 tmp/
 .env
 .venv/
+
+!logs/.gitkeep
+!/data/.gitkeep
