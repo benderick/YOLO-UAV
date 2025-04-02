@@ -1,0 +1,3 @@
+name: yolo11-AKConv
+use_cfg_file: True
+cfg_file: yolo11s-AKConv.yaml

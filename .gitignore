@@ -6,3 +6,5 @@ tmp/
 
 !logs/.gitkeep
 !/data/.gitkeep
+
+__pycache__/

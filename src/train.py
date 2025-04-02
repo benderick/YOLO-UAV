@@ -1,4 +1,5 @@
 # set working directory, get root path
+from omegaconf import DictConfig
 import rootutils
 ROOT = rootutils.setup_root(__file__, dotenv=True, pythonpath=True, cwd=True)
 
@@ -6,27 +7,27 @@ import pretty_errors
 from rich import print
 
 import hydra
-from omegaconf import DictConfig
+from ultralytics.utils import oc_to_dict
 
 import ultralytics
 from ultralytics import YOLO
 
-@hydra.main(version_base="1.3", config_path="configs", config_name="config")
+@hydra.main(version_base="1.3", config_path="../configs", config_name="config")
 def main(cfg: DictConfig) -> None:
     ultralytics.settings["datasets_dir"] = cfg.paths.data_dir
     ultralytics.settings["wandb"] = cfg.use_wandb
-    model = YOLO(cfg.model.cfg_file)
+    model = YOLO("tmp/best.pt")
     model.train(
         project=f"{cfg.paths.output_dir}/{cfg.project_name}",
         name=cfg.run_name,
-        data=cfg.data.cfg_file, 
-        cfg=cfg.mode.cfg_file,
+        data=cfg.data.file, 
+        cfg=cfg.setting,
         epochs=cfg.epochs,
         device=cfg.device,
         batch=cfg.batch,
         fraction=0.01,
-        notes = cfg.notes
-        )
+        logger=cfg.logger,
+    )
 
 if __name__ == "__main__":
     main()

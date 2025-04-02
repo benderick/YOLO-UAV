@@ -4,18 +4,33 @@
 # python train.py experiment=example
 
 defaults:
-  - override /mode: default
   - override /data: VisDrone
-  - override /model: yolo12s
+  - override /model: yolo11-AKConv
 
-
-project_name: VisDrone-Train
+project_name: YOLO-UAV
 run_name: ${model.name}
-use_wandb: True
 
-epochs: 1
+model:
+  name: yolo11-AKConv-Test
+  scale: n
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  project: ${project_name}
+  name: ${model.name}
+  notes: ${notes}
+  data: ${data.name}
+  base_model: ${model.base_model}
+  # ---
+  tags: [AKConv]
+  is_basic: False
+
+epochs: 3
 device: "0"
 batch: 4
-
-
 notes: ???
+
+use_wandb: True # 目前数据库依赖wandb
+
+setting: ${paths.root_dir}/configs/setting/setting.yaml

@@ -1,0 +1,1 @@
+使用`模型.yaml`时，文件必须包含`scale`，`yaml_file`(绝对路径)，`name`.
