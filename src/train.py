@@ -16,7 +16,7 @@ from ultralytics import YOLO
 def main(cfg: DictConfig) -> None:
     ultralytics.settings["datasets_dir"] = cfg.paths.data_dir
     ultralytics.settings["wandb"] = cfg.use_wandb
-    model = YOLO("tmp/best.pt")
+    model = YOLO(oc_to_dict(cfg.model))
     model.train(
         project=f"{cfg.paths.output_dir}/{cfg.project_name}",
         name=cfg.run_name,
@@ -25,8 +25,9 @@ def main(cfg: DictConfig) -> None:
         epochs=cfg.epochs,
         device=cfg.device,
         batch=cfg.batch,
-        fraction=0.01,
-        logger=cfg.logger,
+        # fraction=0.01,
+        patience=0,
+        logger=str(oc_to_dict(cfg.logger)),
     )
 
 if __name__ == "__main__":

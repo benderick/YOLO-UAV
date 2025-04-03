@@ -1,3 +1,0 @@
-name: yolo12s
-use_cfg_file: True
-cfg_file: yolo12s.yaml

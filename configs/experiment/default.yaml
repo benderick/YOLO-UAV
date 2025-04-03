@@ -5,14 +5,14 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: yolo11-AKConv
+  - override /model: yolo11 #
 
 project_name: YOLO-UAV
 run_name: ${model.name}
 
-model:
-  name: yolo11-AKConv-Test
-  scale: n
+model: #
+  name: yolo11
+  scale: s
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
@@ -22,13 +22,15 @@ logger:
   notes: ${notes}
   data: ${data.name}
   base_model: ${model.base_model}
+  scale: ${model.scale}
   # ---
-  tags: [AKConv]
-  is_basic: False
+  tags: []
+  is_basic: True
 
-epochs: 3
-device: "0"
-batch: 4
+#
+epochs: 300
+device: "0,1,2,3"
+batch: 96
 notes: ???
 
 use_wandb: True # 目前数据库依赖wandb
