@@ -1,7 +1,27 @@
 # @package _global_
 defaults:
+  - _self_
   - paths: default
   - data: null
   - model: null
   - experiment: ???
   - hydra: default
+
+project_name: Test
+run_name: ${model.name}
+logger:
+  project: ${project_name}
+  name: ${model.name}
+  notes: ${notes}
+  data: ${data.name}
+  base_model: ${model.base_model}
+  scale: ${model.scale}
+
+
+setting: ${paths.root_dir}/configs/setting/setting.yaml
+
+# 可修改的
+epochs: 2
+device: "0"
+batch: 4
+use_wandb: True # 目前数据库依赖wandb

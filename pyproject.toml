@@ -7,16 +7,20 @@ requires-python = ">=3.10"
 dependencies = [
     "fiftyone>=1.4.0",
     "jupyter>=1.1.1",
-    # "marimo>=0.11.26",
+    "marimo>=0.11.26",
     "pretty-errors>=1.2.25",
     "rich>=13.9.4",
     "rootutils>=1.0.7",
     # "torchinfo>=1.8.0",
     "ultralytics[my-extra]",
     "wandb>=0.19.8",
+    "grad-cam"
     # "wat>=0.6.0",
 ]
 
 
 [tool.uv.sources]
 ultralytics = { path = "../ultralytics", editable = true }
+
+[tool.marimo.runtime]
+output_max_bytes = 1_000_000_000
