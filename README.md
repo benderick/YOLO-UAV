@@ -26,3 +26,12 @@
     - 在cfg文件夹下的VisDrone-Tune.yaml用来覆盖default.yaml
 2. YOLO11s，在VisDrone跑300轮
 
+## 尝试各种模块
+### 卷积替换
+- [x] ADown
+### C3k2替换
+- [x] DWRSeg
+### 上采样替换
+- [ ] DySample
+### 检测头替换
+- [ ] AFPN4Head

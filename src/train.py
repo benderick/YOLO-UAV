@@ -25,8 +25,9 @@ def main(cfg: DictConfig) -> None:
         epochs=cfg.epochs,
         device=cfg.device,
         batch=cfg.batch,
-        fraction=0.01,
+        # fraction=0.01,
         patience=0,
+        amp=False,
         logger=str(oc_to_dict(cfg.logger)),
     )
 

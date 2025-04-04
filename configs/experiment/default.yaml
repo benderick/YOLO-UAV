@@ -17,4 +17,4 @@ logger:
   tags: []
   is_basic: True
 
-notes: "Test yolo11"
+notes: "基线模型：yolo11-s"

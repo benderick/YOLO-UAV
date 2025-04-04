@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: yolo11-C3k2-DWRSeg #
+  - override /model: yolo11-Dysample #
 
 model: #
-  name: yolo11-C3k2-DWRSeg
+  name: yolo11-Dysample
   scale: s
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["DWRSeg"]
+  tags: ["Dysample"]
   is_basic: True
 
-notes: "基本模型，yolo11-C3k2-DWRSeg-s"
+notes: "更换上采样,177"
