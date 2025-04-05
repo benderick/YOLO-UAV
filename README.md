@@ -32,6 +32,12 @@
 ### C3k2替换
 - [x] DWRSeg
 ### 上采样替换
-- [ ] DySample
+- [x] ~~DySample~~
+### C2PSA替换
+
 ### 检测头替换
-- [ ] AFPN4Head
+- [x] ~~AFPN4Head~~
+- [x] FASFFHead
+### 添加注意力
+- [ ] TripletAttention
+- [ ] 

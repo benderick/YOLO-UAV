@@ -11,6 +11,7 @@ run_name: ${model.name}
 logger:
   project: ${project_name}
   name: ${model.name}
+  group: ${model.scale}
   notes: ${notes}
   data: ${data.name}
   base_model: ${model.base_model}
@@ -23,5 +24,5 @@ setting: ${paths.root_dir}/configs/setting/setting.yaml
 project_name: YOLO-UAV
 epochs: 200
 device: "0,1,2,3"
-batch: 32
+batch: 16
 use_wandb: True # 目前数据库依赖wandb
