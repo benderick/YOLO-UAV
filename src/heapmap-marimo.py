@@ -10,7 +10,7 @@ def _():
     return (mo,)
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _():
     ## 基本
     return
@@ -96,12 +96,12 @@ def _(cv2, np):
 @app.cell(hide_code=True)
 def _(
     ActivationsAndGradients,
-    Image,
     Model,
     cv2,
     intersect_dicts,
     letterbox,
     np,
+    plt,
     show_cam_on_image,
     torch,
     trange,
@@ -197,8 +197,10 @@ def _(
                 cam_image = self.draw_detections(post_boxes[i], self.colors[int(post_result[i, :].argmax())],
                                                  f'{self.model_names[int(post_result[i, :].argmax())]} {float(post_result[i].max()):.2f}',
                                                  cam_image)
-                cam_image = Image.fromarray(cam_image)
-                cam_image.show()
+                plt.imshow(cam_image)
+                plt.show()
+                # cam_image = Image.fromarray(cam_image)
+                # cam_image.show()
     return (yolo_heatmap,)
 
 
@@ -210,7 +212,7 @@ def _(mo):
 
 @app.cell
 def _():
-    imgs_dir = "/home/futurama/zhangshuo/YOLO-UAV/data/VisDrone/sample"
+    imgs_dir = "/icislab/volume3/benderick/futurama/YOLO-UAV/data/VisDrone/sample"
     return (imgs_dir,)
 
 
@@ -251,10 +253,10 @@ def _(mo):
 @app.cell(hide_code=True)
 def _(control_conf, control_layer, control_ratio):
     params = {
-        'weight': '/home/futurama/zhangshuo/YOLO-UAV/src/bestt.pt',  # 训练出来的权重文件
-        'cfg': '/home/futurama/zhangshuo/YOLO-UAV/configs/model/yolo11n.yaml',  # 训练权重对应的yaml配置文件
+        'weight': '/icislab/volume3/benderick/futurama/YOLO-UAV/logs/YOLO-UAV/multiruns/2025-04-04_00-22-29/0-yolo11/YOLO-UAV/yolo11/weights/best.pt',  # 训练出来的权重文件
+        'cfg': '/icislab/volume3/benderick/futurama/YOLO-UAV/configs/model/yolo11s.yaml',  # 训练权重对应的yaml配置文件
         'device': 'cuda:0',
-        'method': 'XGradCAM',  # GradCAMPlusPlus, GradCAM, XGradCAM , 使用的热力图库文件不同的效果不一样可以多尝试
+        'method': 'GradCAMPlusPlus',  # GradCAMPlusPlus, GradCAM, XGradCAM , 使用的热力图库文件不同的效果不一样可以多尝试
         'layer': f'model.model[{control_layer.value}]',  # 想要检测的对应层
         'backward_type': 'all',  # class, box, all
         'conf_threshold': control_conf.value,  # 0.6  # 置信度阈值，有的时候你的进度条到一半就停止了就是因为没有高于此值的了
