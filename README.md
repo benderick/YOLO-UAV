@@ -31,13 +31,14 @@
 - [x] ADown
 ### C3k2替换
 - [x] DWRSeg
+- [ ] WTConv
 ### 上采样替换
 - [x] ~~DySample~~
 ### C2PSA替换
 
 ### 检测头替换
 - [x] ~~AFPN4Head~~
-- [x] FASFFHead
+- [x] ASFF4Head
 ### 添加注意力
-- [ ] TripletAttention
+- [x] ~~TripletAttention~~
 - [ ] 
