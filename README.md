@@ -31,7 +31,7 @@
 - [x] ADown
 ### C3k2替换
 - [x] DWRSeg
-- [ ] WTConv
+- [x] ~~WTConv~~
 ### 上采样替换
 - [x] ~~DySample~~
 ### C2PSA替换
