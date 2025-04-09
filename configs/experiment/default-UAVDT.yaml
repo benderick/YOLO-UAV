@@ -4,7 +4,7 @@
 # python train.py experiment=example
 
 defaults:
-  - override /data: VisDrone
+  - override /data: UAVDT
   - override /model: yolo11 #
 
 model: #
@@ -17,4 +17,5 @@ logger:
   tags: []
   is_basic: True
 
-notes: "使用更完善的数据集"
+notes: "UAVDT"
+data_layout: "images-images"

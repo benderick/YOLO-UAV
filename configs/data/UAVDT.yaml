@@ -1,0 +1,2 @@
+name: UAVDT
+file: ${paths.data_dir}/UAVDT/UAVDT.yaml

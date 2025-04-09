@@ -29,6 +29,7 @@ def main(cfg: DictConfig) -> None:
         patience=0,
         amp=False,
         logger=str(oc_to_dict(cfg.logger)),
+        data_layout=cfg.data_layout,    
     )
 
 if __name__ == "__main__":
