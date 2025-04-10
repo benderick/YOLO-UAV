@@ -5,7 +5,7 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: yolo11 #
+  - override /model: baseline/yolo11 #
 
 model: #
   name: yolo11
@@ -17,4 +17,4 @@ logger:
   tags: []
   is_basic: True
 
-notes: "使用更完善的数据集"
+notes: "多层级"

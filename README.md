@@ -29,9 +29,14 @@
 ## 尝试各种模块
 ### 卷积替换
 - [x] ADown
+- [x] ~~ODConv~~
 ### C3k2替换
 - [x] DWRSeg
 - [x] ~~WTConv~~
+- [ ] MAB1
+- [ ] MAB2
+- [ ] RepVGG
+- [ ] RCSOSA
 ### 上采样替换
 - [x] ~~DySample~~
 ### C2PSA替换

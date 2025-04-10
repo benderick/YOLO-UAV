@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: mixup/yolo11-ADown-DWRSeg-FASFFHead-1 #
+  - override /model: basic/yolo11-C3k2-MAB2 #
 
 model: #
-  name: yolo11-ADown-DWRSeg-FASFFHead-1
+  name: yolo11-C3k2-MAB2
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["ADown", "DWRSeg", "FASFFHead"]
-  is_basic: False
+  tags: ["MAB2"]
+  is_basic: True
 
-notes: "ADown-DWRSeg-FASFFHead"
+notes: "替换C3k2"
