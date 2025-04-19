@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: basic/yolo11-C3k2-DWRSeg #
+  - override /model: artifact-0/EAB #
 
 model: #
-  name: yolo11-C3k2-DWRSeg
+  name: EAB
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["DWRSeg"]
+  tags: ["EAB"]
   is_basic: True
 
-notes: "替换C3k2"
+notes: "将浅层C3k2换为EnhancedMAB"

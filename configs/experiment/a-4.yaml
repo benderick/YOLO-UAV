@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: basic/yolo11-C3k2-DWRSeg #
+  - override /model: artifact-0/yolo11-0 #
 
 model: #
-  name: yolo11-C3k2-DWRSeg
+  name: yolo11-0
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["DWRSeg"]
+  tags: ["baseline","yolo11"]
   is_basic: True
 
-notes: "替换C3k2"
+notes: "魔改"

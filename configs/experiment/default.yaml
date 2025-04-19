@@ -9,12 +9,12 @@ defaults:
 
 model: #
   name: yolo11
-  scale: n
+  scale: s
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: []
+  tags: ["baseline","yolo11"]
   is_basic: True
 
-notes: "多层级"
+notes: "bsaeline 使用更完善的数据集"

@@ -14,7 +14,8 @@ dependencies = [
     # "torchinfo>=1.8.0",
     "ultralytics[my-extra]",
     "wandb>=0.19.8",
-    "grad-cam"
+    "grad-cam",
+    "tidecv"
     # "wat>=0.6.0",
 ]
 

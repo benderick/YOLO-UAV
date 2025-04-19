@@ -1,0 +1,162 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.12.2"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "1d0db38904205bec4d6f6f6a1f6cec3e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "8955c26bf442d1ab2e1a6faffdab48c9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<span class=\"markdown prose dark:prose-invert\"><h2 id=\"_1\">\u57fa\u672c</h2></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "e3e9532c051af778fb1546251f8650b5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "844729e59221424aa8cb0ac775e4781b",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "multiple-defs",
+          "evalue": "The variable 'ActivationsAndGradients' was defined by another cell",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "d482aa9ab07532413a7140b399c8f5e8",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "7953af94ba3064e1df5edf9b03081219",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "001e292f4127b46802993ffb3b4ecc74",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "d3c19ca0b2c1659f9eed04c3fdf8f9ce",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "158cd1281d7cfa0e3d6bd17ea01dc7db",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "a8dcbcb402208225a8bf8e1b5f49f44e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "25bfed1b987c1a3f103cc9366d421b5e",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "844ba1b85f60fe5c87448e2b444165f8",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "3c03a95144d9755ce726b1605544decb",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "0c5bf20be3a859e2f9dfdc50dbec6fdf",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "ce7085f86d88a58e9f92b25a39fcc6e4",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "af7812d968acacd3a65389f63d1344e0",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "af0632f85a32f9ddd952413c51b5896a",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "f91e7a4cda83d36bd01fa5ee2c230b48",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "e2659389102c94a1744d297a6078b280",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "2a50c761d6c319b4a3877eda4efe0ebd",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "f69c15ee803f0fb48c2e6d4bc530c2ea",
+      "outputs": [],
+      "console": []
+    }
+  ]
+}

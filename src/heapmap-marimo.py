@@ -11,44 +11,54 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _():
-    ## 基本
+def _(mo):
+    mo.md("""## 基本""")
     return
 
 
 @app.cell(hide_code=True)
 def _():
     import warnings
-
     warnings.filterwarnings('ignore')
     warnings.simplefilter('ignore')
-    import torch, yaml, cv2, os, shutil
+    import torch, yaml, cv2, os, shutil, sys, copy
     import numpy as np
-
     np.random.seed(0)
     import matplotlib.pyplot as plt
     from tqdm import trange
     from PIL import Image
-    from ultralytics.nn.tasks import DetectionModel as Model
+    from ultralytics import YOLO
+    from ultralytics.nn.tasks import attempt_load_weights
     from ultralytics.utils.torch_utils import intersect_dicts
-    from ultralytics.utils.ops import xywh2xyxy
-    from pytorch_grad_cam import GradCAMPlusPlus, GradCAM, XGradCAM
-    from pytorch_grad_cam.utils.image import show_cam_on_image
-    from pytorch_grad_cam.activations_and_gradients import ActivationsAndGradients
+    from ultralytics.utils.ops import xywh2xyxy, non_max_suppression
+    from pytorch_grad_cam import GradCAMPlusPlus, GradCAM, XGradCAM, EigenCAM, HiResCAM, LayerCAM, RandomCAM, EigenGradCAM, KPCA_CAM, AblationCAM
+    from pytorch_grad_cam.utils.image import show_cam_on_image, scale_cam_image
+    # from pytorch_grad_cam.activations_and_gradients import ActivationsAndGradients
     return (
-        ActivationsAndGradients,
+        AblationCAM,
+        EigenCAM,
+        EigenGradCAM,
         GradCAM,
         GradCAMPlusPlus,
+        HiResCAM,
         Image,
-        Model,
+        KPCA_CAM,
+        LayerCAM,
+        RandomCAM,
         XGradCAM,
+        YOLO,
+        attempt_load_weights,
+        copy,
         cv2,
         intersect_dicts,
+        non_max_suppression,
         np,
         os,
         plt,
+        scale_cam_image,
         show_cam_on_image,
         shutil,
+        sys,
         torch,
         trange,
         warnings,
@@ -58,7 +68,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(cv2, np):
+def _(cv2, np, torch):
     def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
         # Resize and pad image while meeting stride-multiple constraints
         shape = im.shape[:2]  # current shape [height, width]
@@ -89,125 +99,386 @@ def _(cv2, np):
         top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
         left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
         im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
-        return im, ratio, (dw, dh)
-    return (letterbox,)
+        return im, ratio, (top, bottom, left, right)
+
+    class ActivationsAndGradients:
+        """ Class for extracting activations and
+        registering gradients from targetted intermediate layers """
+
+        def __init__(self, model, target_layers, reshape_transform):
+            self.model = model
+            self.gradients = []
+            self.activations = []
+            self.reshape_transform = reshape_transform
+            self.handles = []
+            for target_layer in target_layers:
+                self.handles.append(
+                    target_layer.register_forward_hook(self.save_activation))
+                # Because of https://github.com/pytorch/pytorch/issues/61519,
+                # we don't use backward hook to record gradients.
+                self.handles.append(
+                    target_layer.register_forward_hook(self.save_gradient))
+
+        def save_activation(self, module, input, output):
+            activation = output
+
+            if self.reshape_transform is not None:
+                activation = self.reshape_transform(activation)
+            self.activations.append(activation.cpu().detach())
+
+        def save_gradient(self, module, input, output):
+            if not hasattr(output, "requires_grad") or not output.requires_grad:
+                # You can only register hooks on tensor requires grad.
+                return
+
+            # Gradients are computed in reverse order
+            def _store_grad(grad):
+                if self.reshape_transform is not None:
+                    grad = self.reshape_transform(grad)
+                self.gradients = [grad.cpu().detach()] + self.gradients
+
+            output.register_hook(_store_grad)
+
+        def post_process(self, result):
+            if self.model.end2end:
+                logits_ = result[:, :, 4:]
+                boxes_ = result[:, :, :4]
+                sorted, indices = torch.sort(logits_[:, :, 0], descending=True)
+                return logits_[0][indices[0]], boxes_[0][indices[0]]
+            elif self.model.task == 'detect':
+                logits_ = result[:, 4:]
+                boxes_ = result[:, :4]
+                sorted, indices = torch.sort(logits_.max(1)[0], descending=True)
+                return torch.transpose(logits_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(boxes_[0], dim0=0, dim1=1)[indices[0]]
+            elif self.model.task == 'segment':
+                logits_ = result[0][:, 4:4 + self.model.nc]
+                boxes_ = result[0][:, :4]
+                mask_p, mask_nm = result[1][2].squeeze(), result[1][1].squeeze().transpose(1, 0)
+                c, h, w = mask_p.size()
+                mask = (mask_nm @ mask_p.view(c, -1))
+                sorted, indices = torch.sort(logits_.max(1)[0], descending=True)
+                return torch.transpose(logits_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(boxes_[0], dim0=0, dim1=1)[indices[0]], mask[indices[0]]
+            elif self.model.task == 'pose':
+                logits_ = result[:, 4:4 + self.model.nc]
+                boxes_ = result[:, :4]
+                poses_ = result[:, 4 + self.model.nc:]
+                sorted, indices = torch.sort(logits_.max(1)[0], descending=True)
+                return torch.transpose(logits_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(boxes_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(poses_[0], dim0=0, dim1=1)[indices[0]]
+            elif self.model.task == 'obb':
+                logits_ = result[:, 4:4 + self.model.nc]
+                boxes_ = result[:, :4]
+                angles_ = result[:, 4 + self.model.nc:]
+                sorted, indices = torch.sort(logits_.max(1)[0], descending=True)
+                return torch.transpose(logits_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(boxes_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(angles_[0], dim0=0, dim1=1)[indices[0]]
+            elif self.model.task == 'classify':
+                return result[0]
+
+        def __call__(self, x):
+            self.gradients = []
+            self.activations = []
+            model_output = self.model(x)
+            if self.model.task == 'detect':
+                post_result, pre_post_boxes = self.post_process(model_output[0])
+                return [[post_result, pre_post_boxes]]
+            elif self.model.task == 'segment':
+                post_result, pre_post_boxes, pre_post_mask = self.post_process(model_output)
+                return [[post_result, pre_post_boxes, pre_post_mask]]
+            elif self.model.task == 'pose':
+                post_result, pre_post_boxes, pre_post_pose = self.post_process(model_output[0])
+                return [[post_result, pre_post_boxes, pre_post_pose]]
+            elif self.model.task == 'obb':
+                post_result, pre_post_boxes, pre_post_angle = self.post_process(model_output[0])
+                return [[post_result, pre_post_boxes, pre_post_angle]]
+            elif self.model.task == 'classify':
+                data = self.post_process(model_output)
+                return [data]
+
+        def release(self):
+            for handle in self.handles:
+                handle.remove()
+    return ActivationsAndGradients, letterbox
+
+
+@app.cell(hide_code=True)
+def _(torch, trange):
+    class yolo_detect_target(torch.nn.Module):
+        def __init__(self, ouput_type, conf, ratio, end2end) -> None:
+            super().__init__()
+            self.ouput_type = ouput_type
+            self.conf = conf
+            self.ratio = ratio
+            self.end2end = end2end
+
+        def forward(self, data):
+            post_result, pre_post_boxes = data
+            result = []
+            for i in trange(int(post_result.size(0) * self.ratio)):
+                if (self.end2end and float(post_result[i, 0]) < self.conf) or (not self.end2end and float(post_result[i].max()) < self.conf):
+                    break
+                if self.ouput_type == 'class' or self.ouput_type == 'all':
+                    if self.end2end:
+                        result.append(post_result[i, 0])
+                    else:
+                        result.append(post_result[i].max())
+                elif self.ouput_type == 'box' or self.ouput_type == 'all':
+                    for j in range(4):
+                        result.append(pre_post_boxes[i, j])
+            return sum(result)
+
+    class yolo_segment_target(yolo_detect_target):
+        def __init__(self, ouput_type, conf, ratio, end2end):
+            super().__init__(ouput_type, conf, ratio, end2end)
+
+        def forward(self, data):
+            post_result, pre_post_boxes, pre_post_mask = data
+            result = []
+            for i in trange(int(post_result.size(0) * self.ratio)):
+                if float(post_result[i].max()) < self.conf:
+                    break
+                if self.ouput_type == 'class' or self.ouput_type == 'all':
+                    result.append(post_result[i].max())
+                elif self.ouput_type == 'box' or self.ouput_type == 'all':
+                    for j in range(4):
+                        result.append(pre_post_boxes[i, j])
+                elif self.ouput_type == 'segment' or self.ouput_type == 'all':
+                    result.append(pre_post_mask[i].mean())
+            return sum(result)
+
+    class yolo_pose_target(yolo_detect_target):
+        def __init__(self, ouput_type, conf, ratio, end2end):
+            super().__init__(ouput_type, conf, ratio, end2end)
+
+        def forward(self, data):
+            post_result, pre_post_boxes, pre_post_pose = data
+            result = []
+            for i in trange(int(post_result.size(0) * self.ratio)):
+                if float(post_result[i].max()) < self.conf:
+                    break
+                if self.ouput_type == 'class' or self.ouput_type == 'all':
+                    result.append(post_result[i].max())
+                elif self.ouput_type == 'box' or self.ouput_type == 'all':
+                    for j in range(4):
+                        result.append(pre_post_boxes[i, j])
+                elif self.ouput_type == 'pose' or self.ouput_type == 'all':
+                    result.append(pre_post_pose[i].mean())
+            return sum(result)
+
+    class yolo_obb_target(yolo_detect_target):
+        def __init__(self, ouput_type, conf, ratio, end2end):
+            super().__init__(ouput_type, conf, ratio, end2end)
+
+        def forward(self, data):
+            post_result, pre_post_boxes, pre_post_angle = data
+            result = []
+            for i in trange(int(post_result.size(0) * self.ratio)):
+                if float(post_result[i].max()) < self.conf:
+                    break
+                if self.ouput_type == 'class' or self.ouput_type == 'all':
+                    result.append(post_result[i].max())
+                elif self.ouput_type == 'box' or self.ouput_type == 'all':
+                    for j in range(4):
+                        result.append(pre_post_boxes[i, j])
+                elif self.ouput_type == 'obb' or self.ouput_type == 'all':
+                    result.append(pre_post_angle[i])
+            return sum(result)
+
+    class yolo_classify_target(yolo_detect_target):
+        def __init__(self, ouput_type, conf, ratio, end2end):
+            super().__init__(ouput_type, conf, ratio, end2end)
+
+        def forward(self, data):
+            return data.max()
+    return (
+        yolo_classify_target,
+        yolo_detect_target,
+        yolo_obb_target,
+        yolo_pose_target,
+        yolo_segment_target,
+    )
 
 
 @app.cell(hide_code=True)
 def _(
     ActivationsAndGradients,
-    Model,
+    Image,
+    YOLO,
+    copy,
     cv2,
-    intersect_dicts,
     letterbox,
+    non_max_suppression,
     np,
-    plt,
+    os,
+    scale_cam_image,
     show_cam_on_image,
+    shutil,
     torch,
-    trange,
-    xywh2xyxy,
+    yolo_classify_target,
+    yolo_detect_target,
+    yolo_obb_target,
+    yolo_pose_target,
+    yolo_segment_target,
 ):
     class yolo_heatmap:
-        def __init__(self, weight, cfg, device, method, layer, backward_type, conf_threshold, ratio):
+        def __init__(self, weight, device, method, layer, backward_type, conf_threshold, ratio, show_result, renormalize, task, img_size):
             device = torch.device(device)
-            ckpt = torch.load(weight)
-            model_names = ckpt['model'].names
-            csd = ckpt['model'].float().state_dict()  # checkpoint state_dict as FP32
-            model = Model(cfg, ch=3, nc=len(model_names)).to(device)
-            csd = intersect_dicts(csd, model.state_dict(), exclude=['anchor'])  # intersect
-            model.load_state_dict(csd, strict=False)  # load
+            model_yolo = YOLO(weight)
+            model_names = model_yolo.names
+            print(f'model class info:{model_names}')
+            model = copy.deepcopy(model_yolo.model)
+            model.to(device)
+            model.info()
+            for p in model.parameters():
+                p.requires_grad_(True)
             model.eval()
-            print(f'Transferred {len(csd)}/{len(model.state_dict())} items')
 
-            target_layers = [eval(layer)]
-            method = eval(method)
+            model.task = task
+            if not hasattr(model, 'end2end'):
+                model.end2end = False
+
+            if task == 'detect':
+                target = yolo_detect_target(backward_type, conf_threshold, ratio, model.end2end)
+            elif task == 'segment':
+                target = yolo_segment_target(backward_type, conf_threshold, ratio, model.end2end)
+            elif task == 'pose':
+                target = yolo_pose_target(backward_type, conf_threshold, ratio, model.end2end)
+            elif task == 'obb':
+                target = yolo_obb_target(backward_type, conf_threshold, ratio, model.end2end)
+            elif task == 'classify':
+                target = yolo_classify_target(backward_type, conf_threshold, ratio, model.end2end)
+            else:
+                raise Exception(f"not support task({task}).")
+
+            target_layers = [model.model[l] for l in layer]
+            method = eval(method)(model, target_layers)
+            method.activations_and_grads = ActivationsAndGradients(model, target_layers, None)
 
             colors = np.random.uniform(0, 255, size=(len(model_names), 3)).astype(np.int32)
             self.__dict__.update(locals())
 
         def post_process(self, result):
-            logits_ = result[:, 4:]
-            boxes_ = result[:, :4]
-            sorted, indices = torch.sort(logits_.max(1)[0], descending=True)
-            return torch.transpose(logits_[0], dim0=0, dim1=1)[indices[0]], torch.transpose(boxes_[0], dim0=0, dim1=1)[
-                indices[0]], xywh2xyxy(torch.transpose(boxes_[0], dim0=0, dim1=1)[indices[0]]).cpu().detach().numpy()
+            result = non_max_suppression(result, conf_thres=self.conf_threshold, iou_thres=0.65)[0]
+            return result
 
         def draw_detections(self, box, color, name, img):
             xmin, ymin, xmax, ymax = list(map(int, list(box)))
-            cv2.rectangle(img, (xmin, ymin), (xmax, ymax), tuple(int(x) for x in color), 2)
-            cv2.putText(img, str(name), (xmin, ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, tuple(int(x) for x in color), 2,
-                        lineType=cv2.LINE_AA)
+            cv2.rectangle(img, (xmin, ymin), (xmax, ymax), tuple(int(x) for x in color), 2) # 绘制检测框
+            cv2.putText(img, str(name), (xmin, ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, tuple(int(x) for x in color), 2, lineType=cv2.LINE_AA)  # 绘制类别、置信度
             return img
 
-        def __call__(self, img_path):
+        def renormalize_cam_in_bounding_boxes(self, boxes, image_float_np, grayscale_cam):
+            """Normalize the CAM to be in the range [0, 1] 
+            inside every bounding boxes, and zero outside of the bounding boxes. """
+            renormalized_cam = np.zeros(grayscale_cam.shape, dtype=np.float32)
+            for x1, y1, x2, y2 in boxes:
+                x1, y1 = max(x1, 0), max(y1, 0)
+                x2, y2 = min(grayscale_cam.shape[1] - 1, x2), min(grayscale_cam.shape[0] - 1, y2)
+                renormalized_cam[y1:y2, x1:x2] = scale_cam_image(grayscale_cam[y1:y2, x1:x2].copy())    
+            renormalized_cam = scale_cam_image(renormalized_cam)
+            eigencam_image_renormalized = show_cam_on_image(image_float_np, renormalized_cam, use_rgb=True)
+            return eigencam_image_renormalized
+
+        def process(self, img_path, save_path):
             # img process
-            img = cv2.imread(img_path)
-            img = letterbox(img)[0]
+            try:
+                img = cv2.imdecode(np.fromfile(img_path, np.uint8), cv2.IMREAD_COLOR)
+            except:
+                print(f"Warning... {img_path} read failure.")
+                return
+            img, _, (top, bottom, left, right) = letterbox(img, new_shape=(self.img_size, self.img_size), auto=False) # 如果需要完全固定成宽高一样就把auto设置为False
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = np.float32(img) / 255.0
             tensor = torch.from_numpy(np.transpose(img, axes=[2, 0, 1])).unsqueeze(0).to(self.device)
+            print(f'tensor size:{tensor.size()}')
 
-            # init ActivationsAndGradients
-            grads = ActivationsAndGradients(self.model, self.target_layers, reshape_transform=None)
+            try:
+                grayscale_cam = self.method(tensor, [self.target])
+            except AttributeError as e:
+                print(f"Warning... self.method(tensor, [self.target]) failure.")
+                return
 
-            # get ActivationsAndResult
-            result = grads(tensor)
-            activations = grads.activations[0].cpu().detach().numpy()
+            grayscale_cam = grayscale_cam[0, :]
+            cam_image = show_cam_on_image(img, grayscale_cam, use_rgb=True)
 
-            # postprocess to yolo output
-            post_result, pre_post_boxes, post_boxes = self.post_process(result[0])
-            for i in trange(int(post_result.size(0) * self.ratio)):
-                if float(post_result[i].max()) < self.conf_threshold:
-                    break
+            pred = self.model_yolo.predict(tensor, conf=self.conf_threshold, iou=0.7)[0]
+            if self.renormalize and self.task in ['detect', 'segment', 'pose']:
+                cam_image = self.renormalize_cam_in_bounding_boxes(pred.boxes.xyxy.cpu().detach().numpy().astype(np.int32), img, grayscale_cam)
+            if self.show_result:
+                cam_image = pred.plot(img=cam_image,
+                                      conf=True, # 显示置信度
+                                      font_size=None, # 字体大小，None为根据当前image尺寸计算
+                                      line_width=None, # 线条宽度，None为根据当前image尺寸计算
+                                      labels=False, # 显示标签
+                                      )
 
-                self.model.zero_grad()
-                # get max probability for this prediction
-                if self.backward_type == 'class' or self.backward_type == 'all':
-                    score = post_result[i].max()
-                    score.backward(retain_graph=True)
+            # 去掉padding边界
+            cam_image = cam_image[top:cam_image.shape[0] - bottom, left:cam_image.shape[1] - right]
+            tmp = cam_image
+            cam_image = Image.fromarray(cam_image)
+            cam_image.save(save_path)
+            return tmp
 
-                if self.backward_type == 'box' or self.backward_type == 'all':
-                    for j in range(4):
-                        score = pre_post_boxes[i, j]
-                        score.backward(retain_graph=True)
+        def __call__(self, img_path, save_path="./results"):
+            # remove dir if exist
+            if os.path.exists(save_path):
+                shutil.rmtree(save_path)
+            # make dir if not exist
+            os.makedirs(save_path, exist_ok=True)
 
-                # process heatmap
-                if self.backward_type == 'class':
-                    gradients = grads.gradients[0]
-                elif self.backward_type == 'box':
-                    gradients = grads.gradients[0] + grads.gradients[1] + grads.gradients[2] + grads.gradients[3]
-                else:
-                    gradients = grads.gradients[0] + grads.gradients[1] + grads.gradients[2] + grads.gradients[3] + \
-                                grads.gradients[4]
-                b, k, u, v = gradients.size()
-                weights = self.method.get_cam_weights(self.method, None, None, None, activations,
-                                                      gradients.detach().numpy())
-                weights = weights.reshape((b, k, 1, 1))
-                saliency_map = np.sum(weights * activations, axis=1)
-                saliency_map = np.squeeze(np.maximum(saliency_map, 0))
-                saliency_map = cv2.resize(saliency_map, (tensor.size(3), tensor.size(2)))
-                saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
-                if (saliency_map_max - saliency_map_min) == 0:
-                    continue
-                saliency_map = (saliency_map - saliency_map_min) / (saliency_map_max - saliency_map_min)
-
-                # add heatmap and box to image
-                cam_image = show_cam_on_image(img.copy(), saliency_map, use_rgb=True)
-                "不想在图片中绘画出边界框和置信度，注释下面的一行代码即可"
-                cam_image = self.draw_detections(post_boxes[i], self.colors[int(post_result[i, :].argmax())],
-                                                 f'{self.model_names[int(post_result[i, :].argmax())]} {float(post_result[i].max()):.2f}',
-                                                 cam_image)
-                plt.imshow(cam_image)
-                plt.show()
-                # cam_image = Image.fromarray(cam_image)
-                # cam_image.show()
+            if os.path.isdir(img_path):
+                for img_path_ in os.listdir(img_path):
+                    self.process(f'{img_path}/{img_path_}', f'{save_path}/{img_path_}')
+            else:
+                return self.process(img_path, f'{save_path}/result.png')
     return (yolo_heatmap,)
+
+
+@app.cell(hide_code=True)
+def _(control_conf, control_layer1, control_layer2):
+    def make_params(weight, m=1):
+        return {
+            'weight': weight,  # 训练出来的权重文件
+            'device': 'cuda:0',
+            'method': 'GradCAM',  # GradCAMPlusPlus, GradCAM, XGradCAM , 使用的热力图库文件不同的效果不一样可以多尝试
+            'layer': [control_layer1.value if m==1 else control_layer2.value],  # 想要检测的对应层
+            'backward_type': 'all',  # class, box, all
+            'conf_threshold': control_conf.value,  # 0.6  # 置信度阈值，有的时候你的进度条到一半就停止了就是因为没有高于此值的了
+            'ratio': 0.02, # 0.02-0.1
+            'show_result': True, # 不需要绘制结果请设置为False
+            'renormalize': False, # 需要把热力图限制在框内请设置为True(仅对detect,segment,pose有效)
+            'task':'detect', # 任务(detect,segment,pose,obb,classify)
+            'img_size':640, # 图像尺寸
+        }
+    return (make_params,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""## 配置""")
     return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("### 选择模型")
+    return
+
+
+@app.cell
+def _(make_params, yolo_heatmap):
+    model1 = yolo_heatmap(**make_params(
+        "/icislab/volume3/benderick/futurama/YOLO-UAV/logs/YOLO-UAV/runs/2025-04-16_18-39-56-yolo11-EnhancedMAB-ODConv-ADown/YOLO-UAV/yolo11-EnhancedMAB-ODConv-ADown/weights/best.pt",
+        1
+    ))
+    return (model1,)
+
+
+@app.cell
+def _(make_params, yolo_heatmap):
+    model2 = yolo_heatmap(**make_params(
+        '/icislab/volume3/benderick/futurama/YOLO-UAV/logs/YOLO-UAV/runs/2025-04-15_23-29-35-yolo11-SmallMAB-ODConv-ADown/YOLO-UAV/yolo11-SmallMAB-ODConv-ADown/weights/best.pt',
+        2
+    ))
+    return (model2,)
 
 
 @app.cell
@@ -231,9 +502,22 @@ def _(img_list, mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    control_layer = mo.ui.slider(1, 23, show_value=True, label="检测第几层：", value=9)
-    control_layer
-    return (control_layer,)
+    mo.md("""#### 一般看第4层，16层""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    control_layer1 = mo.ui.slider(1, 23, show_value=True, label="M1:检测第几层：", value=16)
+    control_layer1
+    return (control_layer1,)
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    control_layer2 = mo.ui.slider(1, 23, show_value=True, label="M2:检测第几层：", value=16)
+    control_layer2
+    return (control_layer2,)
 
 
 @app.cell(hide_code=True)
@@ -243,43 +527,39 @@ def _(mo):
     return (control_conf,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    control_ratio = mo.ui.slider(0.02,0.1,0.01, show_value=True, label="显示比例", value=0.02)
-    control_ratio
-    return (control_ratio,)
-
-
-@app.cell(hide_code=True)
-def _(control_conf, control_layer, control_ratio):
-    params = {
-        'weight': '/icislab/volume3/benderick/futurama/YOLO-UAV/logs/YOLO-UAV/multiruns/2025-04-04_00-22-29/0-yolo11/YOLO-UAV/yolo11/weights/best.pt',  # 训练出来的权重文件
-        'cfg': '/icislab/volume3/benderick/futurama/YOLO-UAV/configs/model/yolo11s.yaml',  # 训练权重对应的yaml配置文件
-        'device': 'cuda:0',
-        'method': 'GradCAMPlusPlus',  # GradCAMPlusPlus, GradCAM, XGradCAM , 使用的热力图库文件不同的效果不一样可以多尝试
-        'layer': f'model.model[{control_layer.value}]',  # 想要检测的对应层
-        'backward_type': 'all',  # class, box, all
-        'conf_threshold': control_conf.value,  # 0.6  # 置信度阈值，有的时候你的进度条到一半就停止了就是因为没有高于此值的了
-        'ratio': control_ratio.value # 0.02-0.1
-    }
-    return (params,)
-
-
-@app.cell(hide_code=True)
-def _(params, yolo_heatmap):
-    model = yolo_heatmap(**params)
-    return (model,)
+@app.cell
+def _(control_img, img_list, imgs_dir, model1):
+    img1 = model1(imgs_dir + "/" + img_list[control_img.value])
+    return (img1,)
 
 
 @app.cell
-def _(control_img, img_list, imgs_dir, model):
-    model(imgs_dir + "/" + img_list[control_img.value])
-    return
+def _(control_img, img_list, imgs_dir, model2):
+    img2 = model2(imgs_dir + "/" + img_list[control_img.value])
+    return (img2,)
 
 
-@app.cell
-def _():
-    return
+@app.cell(hide_code=True)
+def _(img1, img2, plt):
+    # 创建一行两列的子图
+    fig, axs = plt.subplots(1, 2, figsize=(13, 5))  # 1行2列，设置图像大小
+
+    # 第一个子图
+    axs[0].imshow(img1)
+    axs[0].axis('off')  # 关闭坐标轴
+    axs[0].set_title("1")
+
+    # 第二个子图
+    axs[1].imshow(img2)
+    axs[1].axis('off')  # 关闭坐标轴
+    axs[1].set_title("2")
+
+    # 自动调整布局防止重叠
+    plt.tight_layout()
+
+    # 显示图像
+    plt.show()
+    return axs, fig
 
 
 if __name__ == "__main__":

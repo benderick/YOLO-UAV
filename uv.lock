@@ -109,6 +109,15 @@ wheels = [
 ]
 
 [[package]]
+name = "appdirs"
+version = "1.4.4"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128" },
+]
+
+[[package]]
 name = "appnope"
 version = "0.1.4"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -4295,6 +4304,24 @@ wheels = [
 ]
 
 [[package]]
+name = "tidecv"
+version = "1.0.1"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "appdirs" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "opencv-python" },
+    { name = "pandas" },
+    { name = "pycocotools" },
+    { name = "seaborn" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/67/a7/4357183e1022efd5033ebbf9d1dbf47c0a0dd9236ff2098f55abca5a2da6/tidecv-1.0.1.tar.gz", hash = "sha256:ae6a8714b78483e74a8995659e3a2d656810ab29402d488f11062c8a7a46696e" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/aa/4e/750bc933bb8c0ebe1d6f07b44c1937c46a50d26f9ef00960f1d81f219971/tidecv-1.0.1-py3-none-any.whl", hash = "sha256:42245fa065f87941ebb4016bc6000a89b158976a5c0f2132067d7731e0a1d307" },
+]
+
+[[package]]
 name = "tifffile"
 version = "2025.3.13"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -4960,6 +4987,7 @@ dependencies = [
     { name = "pretty-errors" },
     { name = "rich" },
     { name = "rootutils" },
+    { name = "tidecv" },
     { name = "ultralytics", extra = ["my-extra"] },
     { name = "wandb" },
 ]
@@ -4973,6 +5001,7 @@ requires-dist = [
     { name = "pretty-errors", specifier = ">=1.2.25" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "rootutils", specifier = ">=1.0.7" },
+    { name = "tidecv" },
     { name = "ultralytics", extras = ["my-extra"], editable = "../ultralytics" },
     { name = "wandb", specifier = ">=0.19.8" },
 ]

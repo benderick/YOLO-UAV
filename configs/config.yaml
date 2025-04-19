@@ -11,7 +11,7 @@ run_name: ${model.name}
 logger:
   project: ${project_name}
   name: ${model.name}
-  group: ${model.scale}
+  group: "artifact-0"
   notes: ${notes}
   data: ${data.name}
   base_model: ${model.base_model}

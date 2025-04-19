@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: basic/yolo11-C3k2-DWRSeg #
+  - override /model: mixup/yolo11-DenseMAB-ODConv-ADown #
 
 model: #
-  name: yolo11-C3k2-DWRSeg
+  name: yolo11-DenseMAB-ODConv-ADown
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["DWRSeg"]
-  is_basic: True
+  tags: ["MAB1", "ODConv", "ADown", "DenseMAB"]
+  is_basic: False
 
-notes: "替换C3k2"
+notes: "mixup"
