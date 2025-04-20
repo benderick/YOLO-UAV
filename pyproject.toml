@@ -15,7 +15,8 @@ dependencies = [
     "ultralytics[my-extra]",
     "wandb>=0.19.8",
     "grad-cam",
-    "tidecv"
+    "tidecv",
+    "onnx"
     # "wat>=0.6.0",
 ]
 

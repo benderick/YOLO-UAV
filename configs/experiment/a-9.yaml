@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: artifact-0/MSAB #
+
+model: #
+  name: MSAB
+  scale: n
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  tags: ["SmallObjectMAB_Asymmetric"]
+  is_basic: True
+
+notes: "将浅层C3k2换为SmallObjectMAB_Asymmetric"
