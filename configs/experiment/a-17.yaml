@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: artifact-0/EAB-5 #
+
+model: #
+  name: EAB-5
+  scale: n
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  tags: ["EAB", "DSConv", "SimAM", "BlurPool"]
+  is_basic: False
+
+notes: "SimAM"
