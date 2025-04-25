@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: try/yolo11-0 #
+
+model: #
+  name: yolo11-0
+  scale: n
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  tags: ["baseline"]
+  is_basic: True
+
+notes: "C3k2改为True"
