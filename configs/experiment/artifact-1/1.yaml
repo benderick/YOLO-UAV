@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: artifact-0/yolo11 #
+  - override /model: artifact-1/TMSAB-P2 #
 
 model: #
-  name: yolo11
+  name: TMSAB-P2
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["baseline","yolo11"]
-  is_basic: True
+  tags: ["TMSAB", "P2"]
+  is_basic: False
 
-notes: "bsaeline"
+notes: "测试"

@@ -11,7 +11,7 @@ run_name: ${model.name}
 logger:
   project: ${project_name}
   name: ${model.name}
-  group: "try"
+  group: "artifact-1-n"
   notes: ${notes}
   data: ${data.name}
   base_model: ${model.base_model}
@@ -23,7 +23,7 @@ data_layout: "images-labels"
 
 # 可修改的
 project_name: YOLO-UAV
-epochs: 50
+epochs: 200
 device: "2,3"
 batch: 32
 use_wandb: True # 目前数据库依赖wandb
