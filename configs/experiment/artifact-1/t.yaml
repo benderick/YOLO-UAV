@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: artifact-1/TMSAB-P2-1 #
+
+model: #
+  name: TMSAB-P2-1
+  scale: n
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  tags: ["TMSAB", "P2"]
+  is_basic: False
+
+notes: "测试"

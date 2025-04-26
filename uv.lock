@@ -2510,6 +2510,18 @@ wheels = [
 ]
 
 [[package]]
+name = "prettytable"
+version = "3.16.0"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
+dependencies = [
+    { name = "wcwidth" },
+]
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/99/b1/85e18ac92afd08c533603e3393977b6bc1443043115a47bb094f3b98f94f/prettytable-3.16.0.tar.gz", hash = "sha256:3c64b31719d961bf69c9a7e03d0c1e477320906a98da63952bc6698d6164ff57" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/02/c7/5613524e606ea1688b3bdbf48aa64bafb6d0a4ac3750274c43b6158a390f/prettytable-3.16.0-py3-none-any.whl", hash = "sha256:b5eccfabb82222f5aa46b798ff02a8452cf530a352c31bddfa29be41242863aa" },
+]
+
+[[package]]
 name = "priority"
 version = "2.0.0"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple" }
@@ -4841,6 +4853,7 @@ dependencies = [
     { name = "marimo" },
     { name = "onnx" },
     { name = "pretty-errors" },
+    { name = "prettytable" },
     { name = "rich" },
     { name = "rootutils" },
     { name = "tidecv" },
@@ -4856,6 +4869,7 @@ requires-dist = [
     { name = "marimo", specifier = ">=0.11.26" },
     { name = "onnx" },
     { name = "pretty-errors", specifier = ">=1.2.25" },
+    { name = "prettytable" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "rootutils", specifier = ">=1.0.7" },
     { name = "tidecv" },
