@@ -5,10 +5,10 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: artifact-1/TMSAB-P2-1 #
+  - override /model: artifact-1/TMSAB-P2-t #
 
 model: #
-  name: TMSAB-P2-1
+  name: TMSAB-P2-t
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
