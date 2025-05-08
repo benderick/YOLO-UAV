@@ -5,16 +5,16 @@
 
 defaults:
   - override /data: VisDrone
-  - override /model: artifact-1/yolo11-t #
+  - override /model: artifact-1/MAB #
 
 model: #
-  name: yolo11-t
+  name: MAB
   scale: n
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 
 logger:
-  tags: ["FMBFD"]
-  is_basic: False
+  tags: ["MAB"]
+  is_basic: True
 
-notes: "FMBFD"
+notes: "MAB"
