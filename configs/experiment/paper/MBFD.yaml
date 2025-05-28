@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: paper/MBFD #
+
+model: #
+  name: MBFD
+  scale: m
+  yaml_file: ${model.name}.yaml
+  base_model: yolo11
+
+logger:
+  tags: ["MBFD"]
+  is_basic: True
+
+notes: "MBFD"
