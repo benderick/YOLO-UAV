@@ -17,17 +17,17 @@ def get_weight_size(path):
     return f'{stats.st_size / 1024 / 1024:.1f}'
 
 if __name__ == '__main__':
-    model_path = '/icislab/volume3/benderick/futurama/YOLO-UAV/logs/YOLO-UAV/runs/2025-05-24_11-03-11-MBFD/YOLO-UAV/MBFD/weights/best.pt'
+    model_path = '/icislab/volume3/benderick/futurama/YOLO-UAV/yolo11m.pt'
     model = YOLO(model_path) # 选择训练好的权重路径
     result = model.val(data='/icislab/volume3/benderick/futurama/YOLO-UAV/data/VisDrone/VisDrone.yaml',
-                        split='val', # split可以选择train、val、test 根据自己的数据集情况来选择.
+                        split='test', # split可以选择train、val、test 根据自己的数据集情况来选择.
                         imgsz=640,
-                        batch=16,
+                        batch=8,
                         iou=0.7,
                         conf=0.001,
-                        half=True,
+                        half=False,
                         # rect=False,
-                        # save_json=True, # if you need to cal coco metrice
+                        save_json=True, # if you need to cal coco metrice
                         device="cuda:1",
                         save_dir="./logs/val"
                         )

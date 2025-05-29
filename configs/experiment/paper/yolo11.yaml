@@ -9,7 +9,7 @@ defaults:
 
 model: #
   name: yolo11
-  scale: m
+  scale: s
   yaml_file: ${model.name}.yaml
   base_model: yolo11
 

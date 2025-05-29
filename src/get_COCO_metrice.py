@@ -7,8 +7,8 @@ from tidecv import TIDE, datasets
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--anno_json', type=str, default='data.json', help='label coco json path')
-    parser.add_argument('--pred_json', type=str, default='', help='pred coco json path')
+    parser.add_argument('--anno_json', type=str, default='/icislab/volume3/benderick/futurama/data-inspect/VisDrone-bak/VisDrone2019-DET-test-dev/annotations/test_yolococo.json', help='label coco json path')
+    parser.add_argument('--pred_json', type=str, default='/icislab/volume3/benderick/futurama/ultralytics/runs/detect/val28/val_pred_coco.json', help='pred coco json path')
     
     return parser.parse_known_args()[0]
 
