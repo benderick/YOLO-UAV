@@ -25,5 +25,5 @@ data_layout: "images-labels"
 project_name: YOLO-UAV
 epochs: 130
 device: "2,3"
-batch: 24
+batch: 20
 use_wandb: True # 目前数据库依赖wandb
