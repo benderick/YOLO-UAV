@@ -23,7 +23,7 @@ data_layout: "images-labels"
 
 # 可修改的
 project_name: YOLO-UAV
-epochs: 130
+epochs: 300
 device: "2,3"
 batch: 20
 use_wandb: True # 目前数据库依赖wandb

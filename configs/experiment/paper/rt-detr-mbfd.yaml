@@ -1,0 +1,20 @@
+# @package _global_
+
+# to execute this experiment run:
+# python train.py experiment=example
+
+defaults:
+  - override /data: VisDrone
+  - override /model: paper/rtdetr-l-mbfd #
+
+model: #
+  name: RT-DETR-MBFD
+  scale: l
+  yaml_file: ${model.name}.yaml
+  base_model: RT-DETR-MBFD
+
+logger:
+  tags: ["baseline","RT-DETR-MBFD"]
+  is_basic: True
+
+notes: "RT-DETR-MBFD基线"
